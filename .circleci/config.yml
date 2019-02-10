@@ -2,16 +2,16 @@ version: 2.0
 
 jobs:
     build:
-        macos:
-            xcode: "10.1.0"
+        docker:
+            - image: circleci/openjdk:8-stretch-node-browsers 
         steps:
             - checkout
             - restore_cache:
                 keys:
-                    - gradle-{{ md5 "build.gradle" }}
-            - run: brew install autoconf automake libtool
-            - run: brew install gradle
+                    - gradle-{{ checksum "build.gradle" }}
+            - run: sudo apt-get update && sudo apt-get install autoconf && sudo apt-get install cmake
             - run: ./gradlew natives:connector-64-deploy
+          #  - run: ./gradlew natives:checkNatives
             - run: ./gradlew common:compileJava
             - run: ./gradlew common:processResources
             - run: ./gradlew common:classes
@@ -19,40 +19,11 @@ jobs:
             - save_cache:
                 paths:
                     - ~/.gradle
-                key: gradle-{{ md5 "build.gradle" }}
+                key: gradle-{{ checksum "build.gradle" }}
             - store_artifacts:
                 path: build
-         #  - store_artifacts:
-         #     path: natives
-            - store_artifacts:
-                path: natives-publish
-
-#version: 2.0
-
-#jobs:
-    #build:
-        #docker:
-        #    - image: circleci/openjdk:8-stretch-node-browsers 
-        #steps:
-          #  - checkout
-          #  - restore_cache:
-          #      keys:
-          #          - gradle-{{ checksum "build.gradle" }}
-          #  - run: sudo apt-get update && sudo apt-get install autoconf && sudo apt-get install cmake
-          #  - run: ./gradlew natives:connector-64-deploy
-          #  - run: ./gradlew natives:checkNatives
-          #  - run: ./gradlew common:compileJava
-          #  - run: ./gradlew common:processResources
-          #  - run: ./gradlew common:classes
-          #  - run: ./gradlew common:jar
-          #  - save_cache:
-          #     paths:
-          #          - ~/.gradle
-          #      key: gradle-{{ checksum "build.gradle" }}
-          #  - store_artifacts:
-          #      path: build
           #  - store_artifacts:
           #      path: natives
-          #  - store_artifacts:
-          #      path: natives-publish
-               
+            - store_artifacts:
+                path: natives-publish
+                
